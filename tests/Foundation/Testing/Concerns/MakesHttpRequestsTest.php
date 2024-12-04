@@ -26,6 +26,33 @@ class MakesHttpRequestsTest extends TestCase
         $this->assertSame('Basic foobar', $this->defaultHeaders['Authorization']);
     }
 
+    public function testWithBasicAuthSetsAuthorizationHeader()
+    {
+        $callback = function ($username, $password) {
+            return base64_encode("$username:$password");
+        };
+
+        $username = 'foo';
+        $password = 'bar';
+
+        $this->withBasicAuth($username, $password);
+        $this->assertSame('Basic '.$callback($username, $password), $this->defaultHeaders['Authorization']);
+
+        $password = 'buzz';
+
+        $this->withBasicAuth($username, $password);
+        $this->assertSame('Basic '.$callback($username, $password), $this->defaultHeaders['Authorization']);
+    }
+
+    public function testWithoutTokenRemovesAuthorizationHeader()
+    {
+        $this->withToken('foobar');
+        $this->assertSame('Bearer foobar', $this->defaultHeaders['Authorization']);
+
+        $this->withoutToken();
+        $this->assertArrayNotHasKey('Authorization', $this->defaultHeaders);
+    }
+
     public function testWithoutAndWithMiddleware()
     {
         $this->assertFalse($this->app->has('middleware.disable'));

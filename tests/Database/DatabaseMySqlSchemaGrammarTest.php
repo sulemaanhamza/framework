@@ -319,7 +319,7 @@ class DatabaseMySqlSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertSame('alter table `users` add primary key `bar`(`foo`)', $statements[0]);
+        $this->assertSame('alter table `users` add primary key (`foo`)', $statements[0]);
     }
 
     public function testAddingPrimaryKeyWithAlgorithm()
@@ -329,7 +329,7 @@ class DatabaseMySqlSchemaGrammarTest extends TestCase
         $statements = $blueprint->toSql($this->getConnection(), $this->getGrammar());
 
         $this->assertCount(1, $statements);
-        $this->assertSame('alter table `users` add primary key `bar` using hash(`foo`)', $statements[0]);
+        $this->assertSame('alter table `users` add primary key using hash(`foo`)', $statements[0]);
     }
 
     public function testAddingUniqueKey()
@@ -1295,6 +1295,21 @@ class DatabaseMySqlSchemaGrammarTest extends TestCase
 
         $this->assertCount(1, $statements);
         $this->assertSame("create table `users` (`my_json_column` varchar(255) not null, `my_other_column` varchar(255) as (json_unquote(json_extract(`my_json_column`, '$.\"some_attribute\".\"nested\"'))))", $statements[0]);
+    }
+
+    public function testCreateTableWithVirtualAsColumnWhenJsonColumnHasArrayKey()
+    {
+        $blueprint = new Blueprint('users');
+        $blueprint->create();
+        $blueprint->string('my_json_column')->virtualAsJson('my_json_column->foo[0][1]');
+
+        $conn = $this->getConnection();
+        $conn->shouldReceive('getConfig')->andReturn(null);
+
+        $statements = $blueprint->toSql($conn, $this->getGrammar());
+
+        $this->assertCount(1, $statements);
+        $this->assertSame("create table `users` (`my_json_column` varchar(255) as (json_unquote(json_extract(`my_json_column`, '$.\"foo\"[0][1]'))))", $statements[0]);
     }
 
     public function testCreateTableWithStoredAsColumn()

@@ -11,6 +11,8 @@ use PHPUnit\Framework\TestCase;
 
 class SupportTestingEventFakeTest extends TestCase
 {
+    protected $fake;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -44,6 +46,20 @@ class SupportTestingEventFakeTest extends TestCase
         $this->fake->assertDispatched(function (EventStub $event) {
             return true;
         });
+    }
+
+    public function testAssertListening()
+    {
+        $listener = ListenerStub::class;
+
+        $dispatcher = m::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('getListeners')->andReturn([function ($event, $payload) use ($listener) {
+            return $listener(...array_values($payload));
+        }]);
+
+        $fake = new EventFake($dispatcher);
+
+        $fake->assertListening(EventStub::class, ListenerStub::class);
     }
 
     public function testAssertDispatchedWithCallbackInt()
@@ -142,6 +158,11 @@ class SupportTestingEventFakeTest extends TestCase
 }
 
 class EventStub
+{
+    //
+}
+
+class ListenerStub
 {
     //
 }

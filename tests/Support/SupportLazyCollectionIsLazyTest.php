@@ -143,6 +143,13 @@ class SupportLazyCollectionIsLazyTest extends TestCase
         });
     }
 
+    public function testDoesntContainIsLazy()
+    {
+        $this->assertEnumerates(5, function ($collection) {
+            $collection->doesntContain(5);
+        });
+    }
+
     public function testContainsStrictIsLazy()
     {
         $this->assertEnumerates(5, function ($collection) {
@@ -501,6 +508,39 @@ class SupportLazyCollectionIsLazyTest extends TestCase
         });
     }
 
+    public function testIntersectUsingIsLazy()
+    {
+        $this->assertDoesNotEnumerate(function ($collection) {
+            $collection->intersectUsing([1, 2], 'strcasecmp');
+        });
+
+        $this->assertEnumeratesOnce(function ($collection) {
+            $collection->intersectUsing([1, 2], 'strcasecmp')->all();
+        });
+    }
+
+    public function testIntersectAssocIsLazy()
+    {
+        $this->assertDoesNotEnumerate(function ($collection) {
+            $collection->intersectAssoc([1, 2]);
+        });
+
+        $this->assertEnumeratesOnce(function ($collection) {
+            $collection->intersectAssoc([1, 2])->all();
+        });
+    }
+
+    public function testIntersectAssocUsingIsLazy()
+    {
+        $this->assertDoesNotEnumerate(function ($collection) {
+            $collection->intersectAssocUsing([1, 2], 'strcasecmp');
+        });
+
+        $this->assertEnumeratesOnce(function ($collection) {
+            $collection->intersectAssocUsing([1, 2], 'strcasecmp')->all();
+        });
+    }
+
     public function testIntersectByKeysIsLazy()
     {
         $this->assertDoesNotEnumerate(function ($collection) {
@@ -679,6 +719,13 @@ class SupportLazyCollectionIsLazyTest extends TestCase
     {
         $this->assertEnumeratesOnce(function ($collection) {
             $collection->median();
+        });
+    }
+
+    public function testAvgEnumeratesOnce()
+    {
+        $this->assertEnumeratesOnce(function ($collection) {
+            $collection->avg();
         });
     }
 
@@ -1503,7 +1550,7 @@ class SupportLazyCollectionIsLazyTest extends TestCase
         $data = $this->make(['a' => 0])->concat(
             $this->make([['a' => 1], ['a' => 2], ['a' => 3], ['a' => 4]])
                  ->mapInto(stdClass::class)
-         );
+        );
 
         $this->assertDoesNotEnumerateCollection($data, function ($collection) {
             $collection->whereInstanceOf(stdClass::class);

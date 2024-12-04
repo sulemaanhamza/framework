@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Eloquent\Factories\Factory;
+
 use function PHPStan\Testing\assertType;
 
 /**
@@ -102,13 +103,18 @@ assertType('Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Elo
 assertType('Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model', $factory->createQuietly([
     'string' => 'string',
 ]));
+assertType('Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model', $factory->createQuietly(function ($attributes) {
+    assertType('array<string, mixed>', $attributes);
+
+    return ['string' => 'string'];
+}));
 
 // assertType('Closure(): Illuminate\Database\Eloquent\Collection<int, User>|User', $factory->lazy());
 // assertType('Closure(): Illuminate\Database\Eloquent\Collection<int, User>|User', $factory->lazy([
 //     'string' => 'string',
 // ]));
-assertType('Closure(): Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model', $factory->lazy());
-assertType('Closure(): Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model', $factory->lazy([
+assertType('Closure(): (Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model)', $factory->lazy());
+assertType('Closure(): (Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Eloquent\Model>|Illuminate\Database\Eloquent\Model)', $factory->lazy([
     'string' => 'string',
 ]));
 
@@ -141,7 +147,15 @@ assertType('Illuminate\Database\Eloquent\Collection<int, Illuminate\Database\Elo
 }));
 
 assertType('UserFactory', $factory->state(['string' => 'string']));
-assertType('UserFactory', $factory->state(function () {
+assertType('UserFactory', $factory->state(function ($attributes) {
+    assertType('array<string, mixed>', $attributes);
+
+    return ['string' => 'string'];
+}));
+assertType('UserFactory', $factory->state(function ($attributes, $model) {
+    assertType('array<string, mixed>', $attributes);
+    assertType('Illuminate\Database\Eloquent\Model|null', $model);
+
     return ['string' => 'string'];
 }));
 
